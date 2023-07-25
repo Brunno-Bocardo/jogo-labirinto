@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jogo do Labirinto</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div>
+        <h1>Labirinto com Personagem</h1>
+        <p>Quantidade de Movimentos Restantes: <span id="movimentosRestantes">200</span></p>
+        <canvas id="mazeCanvas" width="400" height="400"></canvas>
+        <ul>
+            <li id="proximoMovimentosMonstro"></li>
+        </ul>
+    </div>
+
+    <div>
+        <h3>Legenda:</h3>
+        <p>Interface:</p>
+        <ul>
+            <li>Verde - ponto de chegada</li>
+            <li>Vermelho - monstro</li>
+            <li>Roxo - Seu personagem</li>
+        </ul>
+
+        <p>Próximos passos do monstro:</p>
+        <ul>
+            <li>1 - frente</li>
+            <li>2 - trás</li>
+            <li>3 - direita</li>
+            <li>4 - esquerda</li>
+        </ul>
+        <br>
+        <h3>Como jogar:</h3>
+        <p>
+            O seu personagem se encontra em um labirinto. Seu objetivo é chegar no ponto verde sem se 
+            encontrar com o monstro.
+        </p>
+        <p>
+            O jogo é feito em turnos, e a cada 3 turnos do monstro, você deverá decidir de que maneira o 
+            monstro irá realizar os seus próximos movimentos, tudo isso baseado em dois tipos de estrutura de 
+            dados, Pilha e Fila.
+        </p>
+        <p>
+            Se você escolher pilha ele realizará a ordem da esquerda pra direita, caso contrário, seguirá a ordem
+            inversa. <strong>A lista de movimentos aparecerá logo abaixo do labirinto</strong>. Quando o monstro for para um
+            lado que tenha uma parede, ele simplesmente "perderá o seu turno". 
+        </p>
+        <p>
+            OBS: Você não deve esgotar a sua quantidade máxima de movimentos. O labirinto e a posição dos componentes 
+            é aleatório, e será sempre refeito ao recarregar a página, perder ou vencer a partida.
+        </p>
+    </div>
+</body>
+</html>
