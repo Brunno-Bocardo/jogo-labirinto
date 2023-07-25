@@ -10,7 +10,7 @@
 <p>- OBS: Você não deve esgotar a sua quantidade máxima de movimentos. O labirinto e a posição dos componentes é aleatório, e será sempre refeito ao recarregar a página, perder ou vencer a partida.</p>
 
 <h2>Acesse Agora!</h2>
-<p><a href="[https://brunno-bocardo.github.io/portfolio/](https://jogo-labirinto.vercel.app/)" target="_blank">Clique aqui</a> para jogar!</p>
+<p><a href="https://jogo-labirinto.vercel.app/" target="_blank">Clique aqui</a> para jogar!</p>
 
 <h2>Como baixar no computador:</h2>
 <p>1 - Logo acima do README, clique no botão "<> code" em azul</p>
