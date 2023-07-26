@@ -9,11 +9,23 @@
 <p>- Se você escolher pilha ele realizará a ordem da esquerda pra direita, caso contrário, seguirá a ordem inversa. A lista de movimentos aparecerá logo abaixo do labirinto. Quando o monstro for para um lado que tenha uma parede, ele simplesmente "perderá o seu turno".</p>
 <p>- OBS: Você não deve esgotar a sua quantidade máxima de movimentos. O labirinto e a posição dos componentes é aleatório, e será sempre refeito ao recarregar a página, perder ou vencer a partida.</p>
 
+<br>
 <h2>Acesse Agora!</h2>
 <p><a href="https://jogo-labirinto.vercel.app/" target="_blank">Clique aqui</a> para jogar!</p>
 
+<br>
 <h2>Como baixar no computador:</h2>
 <p>1 - Logo acima do README, clique no botão "<> code" em azul</p>
 <p>2 - Faça o download do arquivo .zip que contém o jogo</p>
 <p>3 - Descompacte o arquivo .zip</p>
 <p>4 - Dentro da pasta descompactada, abra o arquivo que se chama "index"</p>
+
+<br>
+<h2>Próximos Passos:</h2>
+<p>- Adicionar build e deploy automatico</p>
+<p>- Criar testes automatizados</p>
+<p>- Estruturar padrão de branches e tags no git</p>
+<p>- Criação de níveis de dificuldade</p>
+<p>- Criação de um executável com fases padronizadas</p>
+<p>- Versão mobile</p>
+<p>- Atualização/melhoria do design</p>
