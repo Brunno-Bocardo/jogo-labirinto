@@ -1,56 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Jogo do Labirinto</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Labirinto</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
 </head>
 <body>
-    <div>
-        <h1>Labirinto com Personagem</h1>
-        <p>Quantidade de Movimentos Restantes: <span id="movimentosRestantes">200</span></p>
-        <canvas id="mazeCanvas" width="400" height="400"></canvas>
-        <ul>
-            <li id="proximoMovimentosMonstro"></li>
-        </ul>
+
+    <!-- ====== TELA INICIAL ====== -->
+    <div id="startScreen" class="screen active">
+        <div class="start-container">
+            <h1 class="game-title">LABIRINTO</h1>
+            <p class="game-subtitle">Fuja do monstro. Aprenda estruturas de dados.</p>
+
+            <div class="difficulty-select">
+                <h3>Escolha a dificuldade</h3>
+                <div class="difficulty-buttons">
+                    <button class="btn btn-difficulty" data-difficulty="easy">
+                        <span class="diff-icon">🟢</span>
+                        <span class="diff-label">Facil</span>
+                        <span class="diff-desc">12x12 &bull; 300 movs</span>
+                    </button>
+                    <button class="btn btn-difficulty selected" data-difficulty="medium">
+                        <span class="diff-icon">🟡</span>
+                        <span class="diff-label">Medio</span>
+                        <span class="diff-desc">16x16 &bull; 200 movs</span>
+                    </button>
+                    <button class="btn btn-difficulty" data-difficulty="hard">
+                        <span class="diff-icon">🔴</span>
+                        <span class="diff-label">Dificil</span>
+                        <span class="diff-desc">22x22 &bull; 120 movs &bull; nevoa</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-play" id="btnPlay">JOGAR</button>
+
+            <div class="highscores" id="highscoresStart">
+                <h3>Ranking</h3>
+                <div id="scoreList" class="score-list">
+                    <p class="no-scores">Nenhuma pontuacao ainda</p>
+                </div>
+            </div>
+
+            <div class="controls-info">
+                <p><strong>Controles:</strong> Setas / WASD / Swipe (mobile)</p>
+            </div>
+        </div>
     </div>
 
-    <div>
-        <h3>Legenda:</h3>
-        <p>Interface:</p>
-        <ul>
-            <li>Verde - ponto de chegada</li>
-            <li>Vermelho - monstro</li>
-            <li>Roxo - Seu personagem</li>
-        </ul>
+    <!-- ====== TELA DO JOGO ====== -->
+    <div id="gameScreen" class="screen">
+        <div class="game-layout">
+            <!-- HUD -->
+            <div class="hud">
+                <div class="hud-item">
+                    <span class="hud-label">Movimentos</span>
+                    <span class="hud-value" id="hudMoves">200</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Pontos</span>
+                    <span class="hud-value" id="hudScore">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Nivel</span>
+                    <span class="hud-value" id="hudLevel">Medio</span>
+                </div>
+            </div>
 
-        <p>Próximos passos do monstro:</p>
-        <ul>
-            <li>1 - frente</li>
-            <li>2 - trás</li>
-            <li>3 - direita</li>
-            <li>4 - esquerda</li>
-        </ul>
-        <br>
-        <h3>Como jogar:</h3>
-        <p>
-            O seu personagem se encontra em um labirinto. Seu objetivo é chegar no ponto verde sem se 
-            encontrar com o monstro.
-        </p>
-        <p>
-            O jogo é feito em turnos, e a cada 3 turnos do monstro, você deverá decidir de que maneira o 
-            monstro irá realizar os seus próximos movimentos, tudo isso baseado em dois tipos de estrutura de 
-            dados, Pilha e Fila.
-        </p>
-        <p>
-            Se você escolher pilha ele realizará a ordem da esquerda pra direita, caso contrário, seguirá a ordem
-            inversa. <strong>A lista de movimentos aparecerá logo abaixo do labirinto</strong>. Quando o monstro for para um
-            lado que tenha uma parede, ele simplesmente "perderá o seu turno". 
-        </p>
-        <p>
-            OBS: Você não deve esgotar a sua quantidade máxima de movimentos. O labirinto e a posição dos componentes 
-            é aleatório, e será sempre refeito ao recarregar a página, perder ou vencer a partida.
-        </p>
+            <!-- Canvas -->
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <canvas id="mazeCanvas"></canvas>
+            </div>
+
+            <!-- Monster Moves Info -->
+            <div class="monster-info" id="monsterInfo">
+                <span class="monster-info-label">Proximos movimentos do monstro:</span>
+                <div class="monster-moves-list" id="monsterMovesList"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <div class="legend-item"><span class="legend-color" style="background:#a855f7"></span> Jogador</div>
+                <div class="legend-item"><span class="legend-color" style="background:#ef4444"></span> Monstro</div>
+                <div class="legend-item"><span class="legend-color" style="background:#22c55e"></span> Chegada</div>
+                <div class="legend-item"><span class="legend-color" style="background:#334155"></span> Parede</div>
+            </div>
+
+            <!-- Touch Controls (mobile) -->
+            <div class="touch-controls" id="touchControls">
+                <button class="touch-btn" data-dir="up">▲</button>
+                <div class="touch-row">
+                    <button class="touch-btn" data-dir="left">◀</button>
+                    <button class="touch-btn" data-dir="down">▼</button>
+                    <button class="touch-btn" data-dir="right">▶</button>
+                </div>
+            </div>
+
+            <button class="btn btn-small btn-menu" id="btnBackToMenu">Menu</button>
+        </div>
     </div>
+
+    <!-- ====== MODAL PILHA/FILA ====== -->
+    <div id="choiceModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Escolha a estrutura</h2>
+            <p class="modal-subtitle">Como o monstro vai processar os proximos movimentos?</p>
+
+            <div class="modal-moves">
+                <span class="modal-moves-label">Movimentos:</span>
+                <div class="modal-moves-list" id="modalMovesList"></div>
+            </div>
+
+            <div class="choice-explanation">
+                <div class="choice-option" id="choicePilha">
+                    <button class="btn btn-choice btn-pilha" data-choice="stack">
+                        <span class="choice-icon">📚</span>
+                        <span class="choice-name">PILHA</span>
+                        <span class="choice-type">LIFO</span>
+                    </button>
+                    <p class="choice-desc">Ultimo a entrar, primeiro a sair.<br>Processa da <strong>direita para esquerda</strong>.</p>
+                </div>
+                <div class="choice-option" id="choiceFila">
+                    <button class="btn btn-choice btn-fila" data-choice="queue">
+                        <span class="choice-icon">🚶‍♂️</span>
+                        <span class="choice-name">FILA</span>
+                        <span class="choice-type">FIFO</span>
+                    </button>
+                    <p class="choice-desc">Primeiro a entrar, primeiro a sair.<br>Processa da <strong>esquerda para direita</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== TELA GAME OVER ====== -->
+    <div id="gameOverScreen" class="modal-overlay">
+        <div class="modal modal-result">
+            <div class="result-icon">💀</div>
+            <h2>Game Over</h2>
+            <p class="result-reason" id="gameOverReason">Voce foi pego pelo monstro!</p>
+            <div class="result-stats" id="gameOverStats"></div>
+            <div class="result-buttons">
+                <button class="btn btn-play" id="btnRetry">Tentar Novamente</button>
+                <button class="btn btn-small" id="btnGameOverMenu">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== TELA VITORIA ====== -->
+    <div id="victoryScreen" class="modal-overlay">
+        <div class="modal modal-result modal-victory">
+            <div class="result-icon">🏆</div>
+            <h2>Vitoria!</h2>
+            <p class="result-reason">Voce escapou do labirinto!</p>
+            <div class="result-stats" id="victoryStats"></div>
+            <div class="result-buttons">
+                <button class="btn btn-play" id="btnNextLevel">Proximo Nivel</button>
+                <button class="btn btn-small" id="btnVictoryMenu">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

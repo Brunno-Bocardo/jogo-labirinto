@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo Labirinto - Análise & Melhorias</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a28;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --accent-yellow: #f59e0b;
+            --accent-pink: #ec4899;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1e293b;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        /* Slides */
+        .slide {
+            min-height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 6rem 4rem 4rem;
+            position: relative;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border: 1px solid var(--accent-purple);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-purple) 50%, var(--accent-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            margin-top: 3rem;
+            justify-content: center;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-purple);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 0.25rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            margin-bottom: 3rem;
+        }
+
+        .section-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent-purple);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+            max-width: 600px;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .card-tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        /* Severity Colors */
+        .severity-critical { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .severity-warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-yellow); }
+        .severity-info { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+        .severity-good { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+
+        .icon-critical { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .icon-warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-yellow); }
+        .icon-info { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+        .icon-good { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .icon-purple { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); }
+        .icon-pink { background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); }
+
+        /* Comparison Table */
+        .comparison {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .comparison thead th {
+            text-align: left;
+            padding: 1rem 1.25rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison tbody td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+            font-size: 0.85rem;
+            vertical-align: top;
+        }
+
+        .comparison tbody tr:hover {
+            background: rgba(139, 92, 246, 0.03);
+        }
+
+        .col-topic {
+            font-weight: 600;
+            color: var(--text-primary);
+            width: 20%;
+        }
+
+        .col-theirs {
+            color: var(--text-secondary);
+            width: 35%;
+        }
+
+        .col-mine {
+            width: 45%;
+        }
+
+        .col-mine ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .col-mine li {
+            position: relative;
+            padding-left: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-secondary);
+        }
+
+        .col-mine li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent-purple);
+            font-weight: 700;
+        }
+
+        .check-yes {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .check-no {
+            color: var(--text-muted);
+        }
+
+        .check-partial {
+            color: var(--accent-yellow);
+            font-weight: 600;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.78rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .code-line {
+            display: block;
+        }
+
+        .code-comment { color: #6a737d; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+        .code-number { color: #79c0ff; }
+        .code-removed { background: rgba(239, 68, 68, 0.1); color: #ffa198; text-decoration: line-through; }
+        .code-added { background: rgba(16, 185, 129, 0.1); color: #7ee787; }
+
+        /* Priority Bar */
+        .priority-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .priority-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .priority-item:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .priority-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .priority-content {
+            flex: 1;
+        }
+
+        .priority-content h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .priority-content p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        .priority-impact {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        /* Two Column Layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .col-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+        }
+
+        .col-header.theirs {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .col-header.mine {
+            color: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+
+        .col-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.3);
+        }
+
+        .col-item-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        .dot-blue { background: var(--accent-blue); }
+        .dot-purple { background: var(--accent-purple); }
+
+        .col-item-text h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .col-item-text p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: rotate(45deg);
+        }
+
+        /* Bug highlight */
+        .bug-highlight {
+            background: rgba(239, 68, 68, 0.08);
+            border-left: 3px solid var(--accent-red);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 0.75rem;
+        }
+
+        .bug-highlight p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .bug-highlight strong {
+            color: var(--accent-red);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide { padding: 5rem 1.5rem 3rem; }
+            .two-col { grid-template-columns: 1fr; }
+            .hero-stats { flex-direction: column; gap: 1.5rem; }
+            .nav-links { display: none; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .comparison { font-size: 0.75rem; }
+            .comparison thead th, .comparison tbody td { padding: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-logo">LABIRINTO // ANALISE</div>
+        <div class="nav-links">
+            <a href="#overview">Overview</a>
+            <a href="#bugs">Bugs</a>
+            <a href="#code">Codigo</a>
+            <a href="#comparison">Comparativo</a>
+            <a href="#ux">UX/Design</a>
+            <a href="#roadmap">Roadmap</a>
+        </div>
+    </nav>
+
+    <!-- Slide 1: Hero -->
+    <section class="slide hero" id="hero">
+        <span class="hero-badge">Analise Tecnica</span>
+        <h1>Jogo Labirinto<br>v2.0 Review</h1>
+        <p>Uma analise completa do codigo, gameplay, e arquitetura do jogo — comparando as melhorias planejadas no README com sugestoes adicionais.</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Arquivos</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">316</div>
+                <div class="stat-label">Linhas JS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Linhas CSS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Melhorias README</div>
+            </div>
+        </div>
+        <div class="scroll-hint">
+            <span>Scroll</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Slide 2: Overview do Estado Atual -->
+    <section class="slide" id="overview">
+        <div class="section-header">
+            <div class="section-tag">01 // Estado Atual</div>
+            <h2 class="section-title">O que o jogo faz hoje</h2>
+            <p class="section-subtitle">Resumo da analise do codigo atual (script.js, style.css, index.html)</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon icon-good">&#9889;</div>
+                <h3>Geracao de Labirinto</h3>
+                <p>Usa backtracking recursivo (DFS) para gerar labirintos aleatorios 16x16. Algoritmo correto e funcional — sempre gera labirintos validos com caminhos conectados.</p>
+                <span class="card-tag severity-good">FUNCIONAL</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-purple">&#9822;</div>
+                <h3>Sistema de Turnos</h3>
+                <p>Jogador move, depois monstro move. A cada 3 turnos do monstro, o jogador escolhe entre Pilha (LIFO) ou Fila (FIFO) para definir a ordem dos movimentos do monstro.</p>
+                <span class="card-tag severity-good">FUNCIONAL</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-info">&#127912;</div>
+                <h3>Renderizacao Canvas</h3>
+                <p>Usa HTML5 Canvas 400x400px com celulas coloridas: roxo (jogador), vermelho (monstro), verde (chegada), cinza (paredes), branco (caminho).</p>
+                <span class="card-tag severity-info">BASICO</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#128221;</div>
+                <h3>Conceito Educacional</h3>
+                <p>Ensina estruturas de dados (Pilha vs Fila) de forma interativa — o jogador precisa entender a diferenca para tomar boas decisoes estrategicas.</p>
+                <span class="card-tag severity-good">PONTO FORTE</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#128187;</div>
+                <h3>CSS Minimo</h3>
+                <p>Apenas 5 linhas de CSS: flexbox no body com gap. Sem responsividade, sem temas, sem estilizacao de elementos, sem tipografia customizada.</p>
+                <span class="card-tag severity-warning">PRECISA MELHORAR</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-critical">&#128679;</div>
+                <h3>UX com alert/prompt</h3>
+                <p>Toda interacao (escolha Pilha/Fila, vitoria, derrota) usa alert() e prompt() nativos do navegador. Bloqueia a thread e quebra a experiencia.</p>
+                <span class="card-tag severity-critical">CRITICO</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Bugs Encontrados -->
+    <section class="slide" id="bugs">
+        <div class="section-header">
+            <div class="section-tag">02 // Bugs & Problemas</div>
+            <h2 class="section-title">Problemas encontrados no codigo</h2>
+            <p class="section-subtitle">Bugs reais que afetam o funcionamento do jogo</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon icon-critical">&#128027;</div>
+                <h3>Variaveis globais implicitas</h3>
+                <p><code>listaProxima</code> (linha 177) e <code>proximoMovimento</code> (linhas 218/224) sao declaradas sem <code>let</code>/<code>const</code>, criando variaveis globais implicitas. Em strict mode, isso daria erro.</p>
+                <div class="bug-highlight">
+                    <p><strong>Linha 177:</strong> <code>listaProxima = gerarMovimentos(3)</code> — falta <code>let</code></p>
+                    <p><strong>Linhas 218/224:</strong> <code>proximoMovimento = listaAtual.shift()</code> — falta <code>let</code></p>
+                </div>
+                <span class="card-tag severity-critical">BUG</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-critical">&#128027;</div>
+                <h3>Logica Pilha/Fila invertida</h3>
+                <p>Pilha (Stack = LIFO) deveria usar <code>.pop()</code> mas usa <code>.shift()</code>. Fila (Queue = FIFO) deveria usar <code>.shift()</code> mas usa <code>.pop()</code>. A mecanica esta trocada!</p>
+                <div class="bug-highlight">
+                    <p><strong>Pilha (opcao 1):</strong> usa <code>shift()</code> (remove do inicio = FIFO) — deveria ser <code>pop()</code></p>
+                    <p><strong>Fila (opcao 2):</strong> usa <code>pop()</code> (remove do fim = LIFO) — deveria ser <code>shift()</code></p>
+                </div>
+                <span class="card-tag severity-critical">BUG LOGICO</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#128027;</div>
+                <h3>Conflito na primeira rodada</h3>
+                <p>Nas primeiras 3 jogadas (<code>contadorPrimeiraRodada &lt; 3</code>), o monstro ignora a escolha do jogador e sempre usa <code>pop()</code> na <code>listaAtual</code>. Isso consome a lista sem respeitar a decisao do usuario.</p>
+                <span class="card-tag severity-warning">BUG LOGICO</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#128027;</div>
+                <h3>console.log em producao</h3>
+                <p>Existem 11 chamadas <code>console.log()</code> espalhadas pelo codigo de producao. Vaza informacao do estado interno do jogo e polui o console do navegador.</p>
+                <span class="card-tag severity-warning">LIMPEZA</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#128027;</div>
+                <h3>jogadasRestantes nao utilizada</h3>
+                <p>A variavel <code>jogadasRestantes</code> (linha 87) e decrementada a cada movimento mas nunca e lida ou exibida. Codigo morto que confunde a leitura.</p>
+                <span class="card-tag severity-info">CODIGO MORTO</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-info">&#128027;</div>
+                <h3>Indentacao inconsistente</h3>
+                <p>O <code>script.js</code> comeca com indentacao extra (como se ainda estivesse inline no HTML). Mistura tabs e espacos em varios trechos.</p>
+                <span class="card-tag severity-info">ESTILO</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Code Quality -->
+    <section class="slide" id="code">
+        <div class="section-header">
+            <div class="section-tag">03 // Qualidade de Codigo</div>
+            <h2 class="section-title">Analise tecnica do script.js</h2>
+            <p class="section-subtitle">Problemas de arquitetura e oportunidades de refatoracao</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon icon-critical">&#9888;</div>
+                <h3>Duplicacao massiva</h3>
+                <p>A funcao <code>moverPersonagem()</code> repete o mesmo bloco de 8 linhas para cada uma das 4 direcoes (linhas 262-298). Sao ~40 linhas que poderiam ser ~10.</p>
+                <div class="code-block">
+                    <span class="code-line code-removed">// Hoje: 4 blocos quase identicos</span>
+                    <span class="code-line code-removed">if (tecla === 38 && ...) { apagarPersonagem(); posicao_y--; ... }</span>
+                    <span class="code-line code-removed">if (tecla === 40 && ...) { apagarPersonagem(); posicao_y++; ... }</span>
+                    <span class="code-line code-removed">if (tecla === 37 && ...) { apagarPersonagem(); posicao_x--; ... }</span>
+                    <span class="code-line code-removed">if (tecla === 39 && ...) { apagarPersonagem(); posicao_x++; ... }</span>
+                    <span class="code-line">&nbsp;</span>
+                    <span class="code-line code-added">// Sugestao: mapa de direcoes</span>
+                    <span class="code-line code-added">const direcoes = { 38: [0,-1], 40: [0,1], 37: [-1,0], 39: [1,0] };</span>
+                    <span class="code-line code-added">const dir = direcoes[tecla];</span>
+                    <span class="code-line code-added">if (dir && podeAndar(posicao_x+dir[0], posicao_y+dir[1])) { ... }</span>
+                </div>
+                <span class="card-tag severity-critical">REFATORAR</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#9888;</div>
+                <h3>12+ variaveis globais</h3>
+                <p>Todo o estado do jogo vive em variaveis globais soltas: posicoes, contadores, listas, turno. Zero encapsulamento — qualquer funcao pode modificar qualquer estado.</p>
+                <div class="code-block">
+                    <span class="code-line code-removed">let posicao_x, posicao_y;</span>
+                    <span class="code-line code-removed">let monstro_x, monstro_y;</span>
+                    <span class="code-line code-removed">let turno = 0;</span>
+                    <span class="code-line code-removed">let escolha;</span>
+                    <span class="code-line">&nbsp;</span>
+                    <span class="code-line code-added">class GameState {</span>
+                    <span class="code-line code-added">&nbsp; player = { x: 0, y: 0 };</span>
+                    <span class="code-line code-added">&nbsp; monster = { x: 0, y: 0 };</span>
+                    <span class="code-line code-added">&nbsp; turn = 0;</span>
+                    <span class="code-line code-added">}</span>
+                </div>
+                <span class="card-tag severity-warning">ARQUITETURA</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-warning">&#9888;</div>
+                <h3>prompt() bloqueia tudo</h3>
+                <p>O <code>prompt()</code> na linha 202 congela completamente o jogo, o rendering do canvas, e toda a thread do navegador ate o usuario responder. Pessima UX.</p>
+                <div class="code-block">
+                    <span class="code-line code-removed">escolha = prompt("Escolha:\n1 - Pilha\n2 - Fila");</span>
+                    <span class="code-line">&nbsp;</span>
+                    <span class="code-line code-added">// Sugestao: modal HTML com botoes</span>
+                    <span class="code-line code-added">mostrarModal({ opcoes: ['Pilha', 'Fila'] })</span>
+                    <span class="code-line code-added">&nbsp; .then(escolha => processarEscolha(escolha));</span>
+                </div>
+                <span class="card-tag severity-critical">UX</span>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-info">&#9888;</div>
+                <h3>Sem separacao de responsabilidades</h3>
+                <p>Rendering, logica de jogo, geracao de labirinto, input handling e UI estao todos num unico arquivo de 316 linhas. Dificulta manutencao e testes.</p>
+                <span class="card-tag severity-info">ARQUITETURA</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Comparison Table -->
+    <section class="slide" id="comparison">
+        <div class="section-header">
+            <div class="section-tag">04 // Comparativo</div>
+            <h2 class="section-title">README vs. Minhas Sugestoes</h2>
+            <p class="section-subtitle">Comparacao direta: o que voces planejaram vs. o que eu adicionaria</p>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="comparison">
+                <thead>
+                    <tr>
+                        <th>Topico</th>
+                        <th>Plano do README</th>
+                        <th>Minhas Sugestoes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-topic">Build & Deploy</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Adicionar build e deploy automatico"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Vite como bundler (leve, rapido, HMR)</li>
+                                <li>GitHub Actions para CI/CD</li>
+                                <li>Deploy automatico no Vercel (ja usam!)</li>
+                                <li>Lint + format no pre-commit (ESLint + Prettier)</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Testes</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Criar testes automatizados"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Vitest para unit tests (geracao labirinto, logica pilha/fila)</li>
+                                <li>Playwright para E2E (simular jogada completa)</li>
+                                <li>Primeiro: extrair logica pura do DOM para ser testavel</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Git Workflow</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Estruturar padrao de branches e tags"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Git Flow simplificado: main, develop, feature/*</li>
+                                <li>Conventional Commits (feat:, fix:, refactor:)</li>
+                                <li>Tags semanticas (v1.0.0, v2.0.0)</li>
+                                <li>PR templates + code review obrigatorio</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Dificuldade</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Criacao de niveis de dificuldade"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Facil: grid 10x10, monstro lento, sem limite de movs</li>
+                                <li>Medio: grid 16x16 (atual), mecanica normal</li>
+                                <li>Dificil: grid 20x20, 2 monstros, menos movimentos</li>
+                                <li>Progressivo: comecar facil, aumentar ao vencer</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Fases</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Executavel com fases padronizadas"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>PWA em vez de executavel (instala como app, funciona offline)</li>
+                                <li>Fases com labirintos pre-desenhados + aleatorios intercalados</li>
+                                <li>Sistema de save com localStorage</li>
+                                <li>Electron/Tauri so se realmente precisar de .exe</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Mobile</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Versao mobile"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Canvas responsivo (% do viewport, nao px fixo)</li>
+                                <li>Touch controls: swipe para mover + botoes na tela</li>
+                                <li>Media queries para layout adaptativo</li>
+                                <li>PWA: add to home screen, funciona offline</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Design</td>
+                        <td class="col-theirs"><span class="check-yes">&#10004; Planejado</span><br>"Atualizacao/melhoria do design"</td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Sprites/imagens em vez de quadrados coloridos</li>
+                                <li>Animacoes de movimento (transicoes suaves)</li>
+                                <li>Tela de inicio, game over e vitoria estilizadas</li>
+                                <li>Tema dark com paleta coerente</li>
+                                <li>Efeitos sonoros e musica de fundo</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Correcao de Bugs</td>
+                        <td class="col-theirs"><span class="check-no">&#10008; Nao mencionado</span></td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Corrigir logica Pilha/Fila invertida</li>
+                                <li>Declarar variaveis com let/const</li>
+                                <li>Remover console.logs</li>
+                                <li>Remover variavel jogadasRestantes nao usada</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Refatoracao</td>
+                        <td class="col-theirs"><span class="check-no">&#10008; Nao mencionado</span></td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Eliminar duplicacao no moverPersonagem()</li>
+                                <li>Encapsular estado em classe/modulo</li>
+                                <li>Separar: engine, renderer, input, UI</li>
+                                <li>Substituir alert/prompt por modais HTML</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-topic">Gameplay Extra</td>
+                        <td class="col-theirs"><span class="check-no">&#10008; Nao mencionado</span></td>
+                        <td class="col-mine">
+                            <ul>
+                                <li>Sistema de pontuacao (menos movimentos = mais pontos)</li>
+                                <li>Ranking local com localStorage</li>
+                                <li>Timer opcional alem do limite de movimentos</li>
+                                <li>Power-ups: visao do caminho, congelar monstro</li>
+                                <li>Fog of war (visao limitada ao redor do jogador)</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Slide 6: UX/Design -->
+    <section class="slide" id="ux">
+        <div class="section-header">
+            <div class="section-tag">05 // UX & Design</div>
+            <h2 class="section-title">Melhorias de experiencia</h2>
+            <p class="section-subtitle">As maiores oportunidades de impacto visual e de usabilidade</p>
+        </div>
+
+        <div class="two-col">
+            <div>
+                <div class="col-header theirs">COMO ESTA HOJE</div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-blue"></div>
+                    <div class="col-item-text">
+                        <h4>Quadrados coloridos</h4>
+                        <p>Jogador, monstro e chegada sao apenas retangulos de cor solida sem nenhum detalhe visual</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-blue"></div>
+                    <div class="col-item-text">
+                        <h4>prompt() nativo</h4>
+                        <p>Escolha Pilha/Fila aparece num popup do navegador que congela tudo</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-blue"></div>
+                    <div class="col-item-text">
+                        <h4>alert() para feedback</h4>
+                        <p>Vitoria e derrota sao comunicadas com alert() sem nenhum estilo</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-blue"></div>
+                    <div class="col-item-text">
+                        <h4>Canvas fixo 400x400px</h4>
+                        <p>Nao se adapta a telas diferentes, fica minusculo em desktop grande e nao funciona em mobile</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-blue"></div>
+                    <div class="col-item-text">
+                        <h4>Sem feedback de acao</h4>
+                        <p>Nao ha indicacao visual de que o jogador ou monstro se moveu — simplesmente redesenha</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="col-header mine">COMO PODERIA SER</div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-purple"></div>
+                    <div class="col-item-text">
+                        <h4>Sprites ou emojis com animacao</h4>
+                        <p>Usar drawImage() com spritesheets ou ate emojis estilizados para dar personalidade aos personagens</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-purple"></div>
+                    <div class="col-item-text">
+                        <h4>Modal HTML estilizado</h4>
+                        <p>Dois botoes grandes "PILHA" e "FILA" com explicacao visual, sem bloquear a thread</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-purple"></div>
+                    <div class="col-item-text">
+                        <h4>Tela de game over/vitoria</h4>
+                        <p>Overlay animado com estatisticas (movimentos usados, tempo) e botao "Jogar de Novo"</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-purple"></div>
+                    <div class="col-item-text">
+                        <h4>Canvas responsivo</h4>
+                        <p>Usar % do viewport ou min() para que o canvas se adapte a qualquer tela</p>
+                    </div>
+                </div>
+                <div class="col-item">
+                    <div class="col-item-dot dot-purple"></div>
+                    <div class="col-item-text">
+                        <h4>Animacoes e som</h4>
+                        <p>Transicao suave entre celulas, flash na colisao, som ao andar/ser pego/vencer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: Roadmap Sugerido -->
+    <section class="slide" id="roadmap">
+        <div class="section-header">
+            <div class="section-tag">06 // Roadmap Sugerido</div>
+            <h2 class="section-title">Ordem de prioridade</h2>
+            <p class="section-subtitle">Se eu fosse implementar, faria nesta ordem — do mais impactante ao menos urgente</p>
+        </div>
+
+        <div class="priority-list">
+            <div class="priority-item">
+                <div class="priority-number severity-critical">1</div>
+                <div class="priority-content">
+                    <h4>Corrigir bugs (Pilha/Fila, variaveis, primeira rodada)</h4>
+                    <p>O jogo tem bugs logicos que afetam a mecanica principal. Corrigir antes de qualquer feature nova.</p>
+                </div>
+                <span class="priority-impact severity-critical">URGENTE</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-critical">2</div>
+                <div class="priority-content">
+                    <h4>Substituir alert/prompt por UI propria</h4>
+                    <p>Criar modais HTML para escolha Pilha/Fila e telas de game over. Maior impacto em UX com menor esforco.</p>
+                </div>
+                <span class="priority-impact severity-critical">ALTO IMPACTO</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-warning">3</div>
+                <div class="priority-content">
+                    <h4>Refatorar e limpar o codigo</h4>
+                    <p>Eliminar duplicacao, encapsular estado, remover console.logs. Base limpa para adicionar features.</p>
+                </div>
+                <span class="priority-impact severity-warning">FUNDACAO</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-warning">4</div>
+                <div class="priority-content">
+                    <h4>Design e CSS completo</h4>
+                    <p>Tema visual coerente, layout responsivo, tipografia, cores, e estilizacao dos elementos HTML.</p>
+                </div>
+                <span class="priority-impact severity-warning">VISUAL</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-info">5</div>
+                <div class="priority-content">
+                    <h4>Mobile (canvas responsivo + touch)</h4>
+                    <p>Adaptar canvas ao viewport e adicionar controles touch (swipe ou botoes direcionais na tela).</p>
+                </div>
+                <span class="priority-impact severity-info">ALCANCE</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-info">6</div>
+                <div class="priority-content">
+                    <h4>Niveis de dificuldade + sistema de fases</h4>
+                    <p>Parametrizar tamanho do grid, velocidade do monstro, limite de movimentos. Adicionar progressao.</p>
+                </div>
+                <span class="priority-impact severity-info">GAMEPLAY</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-good">7</div>
+                <div class="priority-content">
+                    <h4>Build, CI/CD e testes</h4>
+                    <p>Vite + GitHub Actions + Vitest. So faz sentido depois que o codigo estiver refatorado.</p>
+                </div>
+                <span class="priority-impact severity-good">INFRA</span>
+            </div>
+            <div class="priority-item">
+                <div class="priority-number severity-good">8</div>
+                <div class="priority-content">
+                    <h4>Extras: pontuacao, ranking, power-ups, PWA</h4>
+                    <p>Features que elevam o jogo de "projeto academico" para "jogo de verdade".</p>
+                </div>
+                <span class="priority-impact severity-good">BONUS</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Analise gerada por Claude // Jogo Labirinto v2.0 // Brunno-Bocardo & ElyelxD</p>
+    </footer>
+
+</body>
+</html>
