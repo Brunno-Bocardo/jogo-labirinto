@@ -14,28 +14,10 @@
             <h1 class="game-title">LABIRINTO</h1>
             <p class="game-subtitle">Fuja do monstro. Aprenda estruturas de dados.</p>
 
-            <div class="difficulty-select">
-                <h3>Escolha a dificuldade</h3>
-                <div class="difficulty-buttons">
-                    <button class="btn btn-difficulty" data-difficulty="easy">
-                        <span class="diff-icon">🟢</span>
-                        <span class="diff-label">Facil</span>
-                        <span class="diff-desc">12x12 &bull; 300 movs</span>
-                    </button>
-                    <button class="btn btn-difficulty selected" data-difficulty="medium">
-                        <span class="diff-icon">🟡</span>
-                        <span class="diff-label">Medio</span>
-                        <span class="diff-desc">16x16 &bull; 200 movs</span>
-                    </button>
-                    <button class="btn btn-difficulty" data-difficulty="hard">
-                        <span class="diff-icon">🔴</span>
-                        <span class="diff-label">Dificil</span>
-                        <span class="diff-desc">22x22 &bull; 120 movs &bull; nevoa</span>
-                    </button>
-                </div>
+            <div class="start-buttons">
+                <button class="btn btn-play" id="btnCampaign">CAMPANHA</button>
+                <button class="btn btn-secondary" id="btnQuickPlay">JOGO RAPIDO</button>
             </div>
-
-            <button class="btn btn-play" id="btnPlay">JOGAR</button>
 
             <div class="highscores" id="highscoresStart">
                 <h3>Ranking</h3>
@@ -46,6 +28,67 @@
 
             <div class="controls-info">
                 <p><strong>Controles:</strong> Setas / WASD / Swipe (mobile)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== TELA LEVEL SELECT (CAMPANHA) ====== -->
+    <div id="levelScreen" class="screen">
+        <div class="level-container">
+            <h2 class="level-title">Campanha</h2>
+            <div id="levelGrid" class="level-grid"></div>
+            <button class="btn btn-small" id="btnLevelBack">Voltar</button>
+        </div>
+    </div>
+
+    <!-- ====== TELA JOGO RAPIDO (config) ====== -->
+    <div id="quickPlayScreen" class="screen">
+        <div class="start-container">
+            <h2 class="section-heading">Jogo Rapido</h2>
+
+            <div class="option-group">
+                <h3 class="option-label">Dificuldade</h3>
+                <div class="option-buttons">
+                    <button class="btn btn-option" data-difficulty="easy">
+                        <span class="opt-icon">🟢</span><span class="opt-label">Facil</span>
+                        <span class="opt-desc">12x12 &bull; 300 movs</span>
+                    </button>
+                    <button class="btn btn-option selected" data-difficulty="medium">
+                        <span class="opt-icon">🟡</span><span class="opt-label">Medio</span>
+                        <span class="opt-desc">16x16 &bull; 200 movs</span>
+                    </button>
+                    <button class="btn btn-option" data-difficulty="hard">
+                        <span class="opt-icon">🔴</span><span class="opt-label">Dificil</span>
+                        <span class="opt-desc">22x22 &bull; 120 movs &bull; nevoa</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <h3 class="option-label">Tipo de Labirinto</h3>
+                <div class="option-buttons">
+                    <button class="btn btn-option selected" data-maze="dfs">
+                        <span class="opt-icon">🔀</span><span class="opt-label">Classico</span>
+                        <span class="opt-desc">Corredores longos</span>
+                    </button>
+                    <button class="btn btn-option" data-maze="prim">
+                        <span class="opt-icon">🌿</span><span class="opt-label">Ramificado</span>
+                        <span class="opt-desc">Ramos curtos</span>
+                    </button>
+                    <button class="btn btn-option" data-maze="kruskal">
+                        <span class="opt-icon">🎲</span><span class="opt-label">Aleatorio</span>
+                        <span class="opt-desc">Distribuicao uniforme</span>
+                    </button>
+                    <button class="btn btn-option" data-maze="binary">
+                        <span class="opt-icon">↗️</span><span class="opt-label">Diagonal</span>
+                        <span class="opt-desc">Tendencia diagonal</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="start-buttons">
+                <button class="btn btn-play" id="btnStartQuick">JOGAR</button>
+                <button class="btn btn-small" id="btnQuickBack">Voltar</button>
             </div>
         </div>
     </div>
@@ -67,6 +110,7 @@
                     <span class="hud-label">Nivel</span>
                     <span class="hud-value" id="hudLevel">Medio</span>
                 </div>
+                <button class="btn btn-toggle" id="btnToggle3D">3D</button>
             </div>
 
             <!-- Canvas -->
@@ -75,20 +119,20 @@
             </div>
 
             <!-- Monster Moves Info -->
-            <div class="monster-info" id="monsterInfo">
+            <div class="monster-info">
                 <span class="monster-info-label">Proximos movimentos do monstro:</span>
                 <div class="monster-moves-list" id="monsterMovesList"></div>
             </div>
 
             <!-- Legend -->
-            <div class="legend">
+            <div class="legend" id="legend2D">
                 <div class="legend-item"><span class="legend-color" style="background:#a855f7"></span> Jogador</div>
                 <div class="legend-item"><span class="legend-color" style="background:#ef4444"></span> Monstro</div>
                 <div class="legend-item"><span class="legend-color" style="background:#22c55e"></span> Chegada</div>
-                <div class="legend-item"><span class="legend-color" style="background:#334155"></span> Parede</div>
+                <div class="legend-item"><span class="legend-color" style="background:#1e293b"></span> Parede</div>
             </div>
 
-            <!-- Touch Controls (mobile) -->
+            <!-- Touch Controls -->
             <div class="touch-controls" id="touchControls">
                 <button class="touch-btn" data-dir="up">▲</button>
                 <div class="touch-row">
@@ -107,28 +151,34 @@
         <div class="modal">
             <h2>Escolha a estrutura</h2>
             <p class="modal-subtitle">Como o monstro vai processar os proximos movimentos?</p>
-
             <div class="modal-moves">
                 <span class="modal-moves-label">Movimentos:</span>
                 <div class="modal-moves-list" id="modalMovesList"></div>
             </div>
-
             <div class="choice-explanation">
-                <div class="choice-option" id="choicePilha">
+                <div class="choice-option">
                     <button class="btn btn-choice btn-pilha" data-choice="stack">
                         <span class="choice-icon">📚</span>
                         <span class="choice-name">PILHA</span>
                         <span class="choice-type">LIFO</span>
                     </button>
-                    <p class="choice-desc">Ultimo a entrar, primeiro a sair.<br>Processa da <strong>direita para esquerda</strong>.</p>
+                    <p class="choice-desc">Ultimo a entrar, primeiro a sair.<br>Processa da <strong>direita p/ esquerda</strong>.</p>
                 </div>
-                <div class="choice-option" id="choiceFila">
+                <div class="choice-option">
                     <button class="btn btn-choice btn-fila" data-choice="queue">
-                        <span class="choice-icon">🚶‍♂️</span>
+                        <span class="choice-icon">🚶</span>
                         <span class="choice-name">FILA</span>
                         <span class="choice-type">FIFO</span>
                     </button>
-                    <p class="choice-desc">Primeiro a entrar, primeiro a sair.<br>Processa da <strong>esquerda para direita</strong>.</p>
+                    <p class="choice-desc">Primeiro a entrar, primeiro a sair.<br>Processa da <strong>esquerda p/ direita</strong>.</p>
+                </div>
+                <div class="choice-option">
+                    <button class="btn btn-choice btn-random" data-choice="random">
+                        <span class="choice-icon">🎲</span>
+                        <span class="choice-name">ALEATORIO</span>
+                        <span class="choice-type">???</span>
+                    </button>
+                    <p class="choice-desc">Voce nao sabe qual sera.<br>Pode ser <strong>Pilha ou Fila</strong>.</p>
                 </div>
             </div>
         </div>
@@ -139,7 +189,7 @@
         <div class="modal modal-result">
             <div class="result-icon">💀</div>
             <h2>Game Over</h2>
-            <p class="result-reason" id="gameOverReason">Voce foi pego pelo monstro!</p>
+            <p class="result-reason" id="gameOverReason"></p>
             <div class="result-stats" id="gameOverStats"></div>
             <div class="result-buttons">
                 <button class="btn btn-play" id="btnRetry">Tentar Novamente</button>
@@ -162,6 +212,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>

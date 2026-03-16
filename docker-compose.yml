@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    container_name: labirinto-prod
+    ports:
+      - "8080:80"
+    restart: unless-stopped
